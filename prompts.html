@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Input Support | Emerald Intelligence</title>
+    <link rel="stylesheet" href="index.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;600;800&family=Outfit:wght@300;500;700;900&display=swap"
+        rel="stylesheet">
+    <style>
+        .questions-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .random-box {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, rgba(80, 200, 120, 0.1) 0%, rgba(0, 255, 136, 0.1) 100%);
+            border: 2px dashed var(--primary-color);
+            padding: 3rem;
+            text-align: center;
+            border-radius: 32px;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            animation: borderPulse 3s infinite;
+        }
+
+        @keyframes borderPulse {
+            0% {
+                border-color: var(--primary-color);
+            }
+
+            50% {
+                border-color: var(--accent-color);
+            }
+
+            100% {
+                border-color: var(--primary-color);
+            }
+        }
+
+        .random-text {
+            font-size: 1.8rem;
+            font-weight: 500;
+            color: var(--text-main);
+            margin-bottom: 2rem;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-magic {
+            background: var(--primary-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 10px 20px rgba(80, 200, 120, 0.3);
+        }
+
+        .btn-magic:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(80, 200, 120, 0.5);
+            background: var(--accent-color);
+        }
+
+        .category-title {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .prompt-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            padding: 1.2rem;
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .prompt-item:hover {
+            background: rgba(80, 200, 120, 0.1);
+            border-color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .copy-hint {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .prompt-item:hover .copy-hint {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-glow"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">Digital Brain</a>
+            <div class="nav-links">
+                <a href="index.html">Dashboard</a>
+                <a href="prompts.html" class="active">Brain Input Support</a>
+                <a href="wiki_hub.html">Wiki Hub</a>
+                <a href="graph.html">Knowledge Graph</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="hero">
+            <h1 class="glitch" style="font-size: 4rem;">Brain Input Support</h1>
+            <p class="subtitle">Khơi nguồn kể chuyện — Nạp tri thức vô tận</p>
+           <section class="random-box">
+            <p class="status-label" style="text-transform: uppercase; margin-bottom: 1rem;">Gợi ý ngẫu nhiên cho bạn</p>
+            <div class="random-text" id="random-prompt">Hãy nhấn nút bên dưới để bắt đầu một câu chuyện mới...</div>
+            
+            <div style="margin-bottom: 2rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
+                <button class="question-chip" onclick="setFilter('all')" id="filter-all" style="background: var(--primary-color); color: var(--bg-color);">Tất cả</button>
+                <button class="question-chip" onclick="setFilter('onboarding')">Nhập cuộc</button>
+                <button class="question-chip" onclick="setFilter('knowledge')">Tri thức</button>
+                <button class="question-chip" onclick="setFilter('relationships')">Mối quan hệ</button>
+                <button class="question-chip" onclick="setFilter('principles')">Niềm tin</button>
+            </div>
+
+            <button class="btn-magic" onclick="generateRandom()">TẠO CÂU HỎI MỚI ✨</button>
+        </section>
+
+        <div style="margin-bottom: 2rem;">
+            <input type="text" id="search-input" placeholder="Tìm kiếm câu hỏi..." style="width: 100%; padding: 1rem; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-main); font-family: inherit;" onkeyup="filterList()">
+        </div>
+
+        <div class="questions-container" id="questions-list">
+            <!-- Questions rendered by JS -->
+        </div>
+
+    </main>
+
+    <script>
+        const allPrompts = [
+            { category: "onboarding", text: "Bạn hiểu biết sâu sắc nhất về lĩnh vực/mảng nào?" },
+            { category: "onboarding", text: "Bạn đang dành phần lớn thời gian trong ngày để làm gì?" },
+            { category: "onboarding", text: "Nếu phải tự giới thiệu về 3 'siêu năng lực' của mình, đó là gì?" },
+            { category: "onboarding", text: "Lĩnh vực nào đang chiếm nồng độ cao nhất trong bộ não của bạn?" },
+            { category: "onboarding", text: "Một ngày lý tưởng của bạn trông như thế nào?" },
+            { category: "onboarding", text: "Điều gì giúp bạn kiếm tiền, và điều gì giúp bạn cảm thấy sống có ý nghĩa?" },
+            { category: "knowledge", text: "Dự án nào khiến bạn 'mất ăn mất ngủ' nhưng lại tự hào nhất?" },
+            { category: "knowledge", text: "Cuốn sách hay khóa học nào đã làm thay đổi hoàn toàn tư duy của bạn?" },
+            { category: "knowledge", text: "Kể về một lần bạn học được bài học 'xương máu' từ sự thất bại?" },
+            { category: "knowledge", text: "Bạn có thể dạy lại cho người khác mảng kiến thức nào ngay bây giờ?" },
+            { category: "knowledge", text: "Kỹ năng nào bạn đã thực hành đến mức trở thành 'phản xạ tự nhiên'?" },
+            { category: "knowledge", text: "Tư duy nào bạn ước mình biết sớm hơn 10 năm?" },
+            { category: "relationships", text: "Ai là người đã giúp bạn định nghĩa lại khái niệm 'Thân'?" },
+            { category: "relationships", text: "Bạn có kỷ niệm 'định mệnh' nào với một tổ chức/cộng đồng không?" },
+            { category: "relationships", text: "Có thực thể nào bạn ghét lúc đầu nhưng sau lại rất quý trọng?" },
+            { category: "relationships", text: "Lần gần nhất bạn giúp đỡ ai đó vô điều kiện là khi nào?" },
+            { category: "relationships", text: "Mối quan hệ nào đang mang lại cho bạn nhiều năng lượng tích cực nhất?" },
+            { category: "relationships", text: "Một hành động tử tế của người lạ mà bạn không bao giờ quên?" },
+            { category: "principles", text: "Điều gì là 'bất di bất dịch' trong cách bạn làm việc và sống?" },
+            { category: "principles", text: "Bạn sẽ không bao giờ đồng ý làm gì dù được trả bao nhiêu tiền?" },
+            { category: "principles", text: "Niềm tin tâm linh hay triết học nào đang dẫn dắt bạn mỗi ngày?" },
+            { category: "principles", text: "Nếu ngày mai niềm tin hiện tại không còn đúng, thế giới của bạn sẽ ra sao?" },
+            { category: "principles", text: "Một nguyên tắc sống cũ bạn mới vừa từ bỏ là gì? Tại sao?" },
+            { category: "knowledge", text: "Hôm nay bạn đã học được điều gì khiến bạn phải 'Wow'?" },
+            { category: "onboarding", text: "Mô tả trạng thái 'Dòng chảy' (Flow) khi bạn đang làm việc?" },
+            { category: "onboarding", text: "Nếu có một nguồn lực vô hạn, dự án tiếp theo của bạn là gì?" },
+            { category: "onboarding", text: "Khoảng khoắc nào trong quá khứ bạn cảm thấy mình thực sự 'sống'?" },
+            { category: "onboarding", text: "Làm thế nào bạn biết mình đang làm đúng việc?" },
+            { category: "onboarding", text: "Sai lầm lặp đi lặp lại nhiều nhất của bạn là gì?" },
+            { category: "onboarding", text: "Bạn thường nói 'không' với điều gì nhất?" },
+            { category: "onboarding", text: "Điều gì khiến bạn cảm thấy tự tin nhất về bản thân?" },
+            { category: "knowledge", text: "Tư duy nào bạn ước mình biết sớm hơn 10 năm?" },
+            { category: "knowledge", text: "Nếu phải bắt đầu lại từ con số 0, bạn sẽ làm gì đầu tiên?" },
+            { category: "relationships", text: "Ai là người bạn cảm thấy mang nợ tri thức nhiều nhất?" },
+            { category: "knowledge", text: "Hành động nhỏ nào bạn làm mỗi ngày mang lại kết quả lớn nhất?" },
+            { category: "onboarding", text: "Bạn định nghĩa thế nào là một ngày thành công?" },
+            { category: "onboarding", text: "Nỗi sợ lớn nhất đang ngăn cản bạn tiến về phía trước là gì?" },
+            { category: "onboarding", text: "Lần cuối cùng bạn làm điều gì đó lần đầu tiên là khi nào?" },
+            { category: "onboarding", text: "Bạn muốn được nhớ đến vì điều gì nhất (Di sản)?" },
+            { category: "relationships", text: "Mối quan hệ nào khiến bạn phải học cách kiên nhẫn nhất?" },
+            { category: "relationships", text: "Điều gì ở con người khiến bạn cảm thấy thú vị nhất?" },
+            { category: "principles", text: "Bạn tin vào điều gì mà hầu hết mọi người xung quanh đều không tin?" },
+            { category: "principles", text: "Nếu có thể trò chuyện với phiên bản 80 tuổi của chính mình, bạn sẽ hỏi gì?" },
+            { category: "knowledge", text: "Môn học nào ở trường bạn thấy vô dụng nhất nhưng thực tế lại hữu ích?" },
+            { category: "knowledge", text: "Làm thế nào bạn giữ được sự tập trung giữa một thế giới đầy xao lãng?" },
+            { category: "onboarding", text: "Điều gì khiến bạn cảm thấy mình đang già đi?" },
+            { category: "onboarding", text: "Điều gì khiến bạn cảm thấy mình vẫn còn rất trẻ?" },
+            { category: "knowledge", text: "Kể về một lần bạn chọn con đường khó khăn thay vì con đường dễ dàng?" },
+            { category: "principles", text: "Bạn thường phản ứng thế nào khi ý kiến của mình bị phản bác?" },
+            { category: "onboarding", text: "Một thói quen xấu bạn đã chiến thắng thành công là gì?" },
+            { category: "onboarding", text: "Điều gì khiến bạn cảm thấy mình có ích cho xã hội nhất?" },
+            { category: "onboarding", text: "Bạn thích làm việc một mình hay làm việc theo nhóm? Tại sao?" },
+            { category: "onboarding", text: "Nếu phải viết một cuốn sách, chủ đề đó sẽ là gì?" },
+            { category: "onboarding", text: "Làm thế nào bạn xử lý những dòng cảm giác tiêu cực?" },
+            { category: "onboarding", text: "Điều gì khiến bạn cảm thấy biết ơn nhất vào lúc này?" },
+            { category: "onboarding", text: "Bạn thường tìm kiếm sự cảm hứng ở đâu?" },
+            { category: "onboarding", text: "Một bí mật nhỏ về cách bạn tổ chức cuộc sống là gì?" },
+            { category: "onboarding", text: "Bạn định nghĩa thế nào là sự tự do?" },
+            { category: "onboarding", text: "Ai là hình mẫu lý tưởng (Role Model) của bạn trong công việc?" },
+            { category: "onboarding", text: "Điều gì bạn từng cho là đúng nhưng giờ nhận ra là sai hoàn toàn?" },
+            { category: "onboarding", text: "Bạn làm gì để nạp lại năng lượng sau một ngày mệt mỏi?" },
+            { category: "onboarding", text: "Sức mạnh lớn nhất của sự im lặng đối với bạn là gì?" },
+            { category: "relationships", text: "Bạn thường chú ý điều gì đầu tiên khi gặp một người mới?" },
+            { category: "onboarding", text: "Một kỷ niệm từ thơ ấu vẫn còn ảnh hưởng đến bạn đến tận bây giờ?" },
+            { category: "knowledge", text: "Bạn thích quá trình làm việc hay kết quả cuối cùng hơn?" },
+            { category: "onboarding", text: "Nếu có thể thay đổi một quy luật vật lý, bạn sẽ thay đổi điều gì?" },
+            { category: "onboarding", text: "Làm thế nào bạn phân biệt được trực giác và nỗi sợ hãi?" },
+            { category: "relationships", text: "Điều gì khiến bạn cảm thấy mình đang thực sự được lắng nghe?" },
+            { category: "principles", text: "Bạn có tin vào định mệnh hay tự mình tạo ra vận mệnh?" },
+            { category: "knowledge", text: "Một công nghệ mới nào bạn đang kỳ vọng nhất?" },
+            { category: "onboarding", text: "Bạn thường dành bao nhiêu thời gian cho việc suy ngẫm (Reflect)?" },
+            { category: "onboarding", text: "Điều gì khiến bạn cảm thấy mình là một người can đảm?" },
+            { category: "onboarding", text: "Kể về một món đồ bạn sở hữu có giá trị tinh thần lớn nhất?" },
+            { category: "knowledge", text: "Làm thế nào bạn biết mình đã đủ 'hiểu' một kỹ năng?" },
+            { category: "knowledge", text: "Một lời khuyên tệ nhất bạn từng nhận được là gì?" },
+            { category: "onboarding", text: "Bạn xử lý thế nào với cảm giác bị tụt hậu (FOMO)?" },
+            { category: "knowledge", text: "Điều gì khiến bạn cảm thấy một công việc là đáng giá?" },
+            { category: "onboarding", text: "Bạn nghĩ gì về sự cô đơn?" },
+            { category: "relationships", text: "Làm thế nào bạn xây dựng lòng tin với một người lạ?" },
+            { category: "onboarding", text: "Một câu hỏi bạn luôn tự hỏi chính mình mỗi ngày là gì?" },
+            { category: "relationships", text: "Bạn cảm thấy mình thuộc về cộng đồng nào nhất?" },
+            { category: "onboarding", text: "Điều gì khiến bạn cảm thấy mình có sức sáng tạo nhất?" },
+            { category: "onboarding", text: "Bạn thường ưu tiên Logic hay Cảm xúc khi ra quyết định quan trọng?" },
+            { category: "onboarding", text: "Một bài học từ thiên nhiên mà bạn đã áp dụng vào cuộc sống?" },
+            { category: "onboarding", text: "Làm thế nào bạn biết mình đã thay đổi sau 1 năm?" },
+            { category: "onboarding", text: "Điều gì khiến bạn cảm thấy mình là một người đáng tin cậy?" },
+            { category: "knowledge", text: "Có khái niệm nào bạn thấy rất khó để giải thích cho người khác không?" },
+            { category: "relationships", text: "Bạn định nghĩa thế nào là một mối quan hệ chất lượng?" },
+            { category: "onboarding", text: "Một nỗi lo lắng vô lý nhất mà bạn từng có là gì?" },
+            { category: "onboarding", text: "Nếu được quay lại một thời điểm trong quá khứ, bạn sẽ chọn lúc nào?" },
+            { category: "onboarding", text: "Bạn nghĩ gì về sự cân bằng giữa công việc và cuộc sống (Work-life balance)?" },
+            { category: "onboarding", text: "Điều gì khiến bạn cảm thấy hạnh phúc nhất một cách đơn giản nhất?" },
+            { category: "knowledge", text: "Bạn có phong cách làm việc như thế nào (Sáng sớm, đêm khuya, hay theo cảm hứng)?" },
+            { category: "onboarding", text: "Một điều gì đó nhỏ nhặt nhưng lại khiến bạn cực kỳ khó chịu?" },
+            { category: "onboarding", text: "Bạn thường đối phó với sự thay đổi đột ngột như thế nào?" },
+            { category: "principles", text: "Ý nghĩa thực sự của việc 'Sống trọn vẹn' đối với bạn là gì?" },
+            { category: "knowledge", text: "Bạn có tin vào tình yêu từ cái nhìn đầu tiên đối với một ý tưởng không?" },
+            { category: "knowledge", text: "Làm thế nào bạn giữ được sự tò mò trong suốt những năm qua?" },
+            { category: "onboarding", text: "Điều gì khiến bạn cảm thấy mình đang làm chủ cuộc đời mình?" },
+            { category: "onboarding", text: "Bạn thường làm gì khi đối mặt với sự trì hoãn?" },
+            { category: "relationships", text: "Một hành động tử tế của người lạ mà bạn không bao giờ quên?" },
+            { category: "onboarding", text: "Bạn cảm thấy mình còn 'thiếu' điều gì nhất vào lúc này?" },
+            { category: "onboarding", text: "Nếu cuộc đời là một bộ phim, thể loại đó sẽ là gì?" },
+            { category: "onboarding", text: "Điều gì khiến bạn cảm thấy mình là một người hạnh phúc?" },
+            { category: "knowledge", text: "Bạn có bí mật nào về cách ghi nhớ thông tin không?" },
+            { category: "onboarding", text: "Làm thế nào bạn biết mình đã tìm thấy mục tiêu thực sự của mình?" }
+        ];
+
+        let currentFilter = 'all';
+
+        function setFilter(category) {
+            currentFilter = category;
+            
+            // Update UI buttons
+            document.querySelectorAll('.question-chip').forEach(btn => {
+                btn.style.background = 'rgba(80, 200, 120, 0.1)';
+                btn.style.color = 'var(--primary-color)';
+            });
+            const activeBtn = document.getElementById('filter-' + category);
+            if (activeBtn) {
+                activeBtn.style.background = 'var(--primary-color)';
+                activeBtn.style.color = 'var(--bg-color)';
+            }
+
+            filterList();
+        }
+
+        function generateRandom() {
+            const el = document.getElementById('random-prompt');
+            el.style.opacity = '0';
+            setTimeout(() => {
+                const filtered = currentFilter === 'all' 
+                    ? allPrompts 
+                    : allPrompts.filter(p => p.category === currentFilter);
+                
+                const random = filtered[Math.floor(Math.random() * filtered.length)].text;
+                el.innerText = random;
+                el.style.opacity = '1';
+                el.style.animation = 'fadeInDown 0.5s ease-out';
+            }, 300);
+        }
+
+        function filterList() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const container = document.getElementById('questions-list');
+            container.innerHTML = '';
+
+            const filtered = allPrompts.filter(p => {
+                const matchesFilter = currentFilter === 'all' || p.category === currentFilter;
+                const matchesSearch = p.text.toLowerCase().includes(searchTerm);
+                return matchesFilter && matchesSearch;
+            });
+
+            // Group by category to maintain structure
+            const categories = {
+                onboarding: "01. Nhập cuộc (Onboarding)",
+                knowledge: "02. Tri thức & Kinh nghiệm",
+                relationships: "03. Mối quan hệ thực thể",
+                principles: "04. Hệ niềm tin & Nguyên tắc"
+            };
+
+            for (const [key, title] of Object.entries(categories)) {
+                const items = filtered.filter(p => p.category === key).slice(0, 5);
+                if (items.length > 0) {
+                    const section = document.createElement('div');
+                    section.innerHTML = `<h3 class="category-title">${title}</h3>`;
+                    items.forEach(p => {
+                        const item = document.createElement('div');
+                        item.className = 'prompt-item';
+                        item.onclick = function() { copyToClipboard(this); };
+                        item.innerHTML = `<span>${p.text}</span> <span class="copy-hint">Copy</span>`;
+                        section.appendChild(item);
+                    });
+                    container.appendChild(section);
+                }
+            }
+        }
+
+        function copyToClipboard(el) {
+            const text = el.querySelector('span').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const originalColor = el.style.borderColor;
+                const originalBg = el.style.background;
+                el.style.borderColor = "#00ff88";
+                el.style.background = "rgba(0, 255, 136, 0.1)";
+                const hint = el.querySelector('.copy-hint');
+                hint.innerText = "Copied!";
+                hint.style.opacity = "1";
+                setTimeout(() => {
+                    el.style.borderColor = originalColor;
+                    el.style.background = originalBg;
+                    hint.innerText = "Copy";
+                }, 2000);
+            });
+        }
+
+        // Initial render
+        filterList();
+    </script>
+</body>
+</html>

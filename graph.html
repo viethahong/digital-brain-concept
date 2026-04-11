@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Graph | Digital Brain</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;600;800&family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <script src="stats.js"></script>
+    <script src="https://unpkg.com/force-graph"></script>
+    <style>
+        body {
+            overflow: hidden;
+            margin: 0;
+        }
+        #graph-container {
+            width: 100vw;
+            height: calc(100vh - 70px);
+            margin-top: 70px;
+            background: #0a0a0a;
+        }
+        .graph-tooltip {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--primary-color);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+        .graph-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+        .control-btn {
+            background: rgba(80, 200, 120, 0.1);
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: var(--transition);
+        }
+        .control-btn:hover {
+            background: var(--primary-color);
+            color: var(--bg-color);
+        }
+        .legend {
+            position: absolute;
+            top: 90px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-glow"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">Digital Brain</a>
+            <div class="nav-links">
+                <a href="index.html">Dashboard</a>
+                <a href="brain_room.html">Brain Room</a>
+                <a href="prompts.html">Brain Input Support</a>
+                <a href="wiki_hub.html">Wiki Hub</a>
+                <a href="graph.html" class="active">Knowledge Graph</a>
+            </div>
+        </div>
+    </nav>
+
+    <div id="graph-container"></div>
+
+    <div class="legend">
+        <div class="legend-item"><div class="dot" style="background: #50C878;"></div> Knowledge</div>
+        <div class="legend-item"><div class="dot" style="background: #FFD700;"></div> Principles</div>
+        <div class="legend-item"><div class="dot" style="background: #00BFFF;"></div> Philosophies</div>
+        <div class="legend-item"><div class="dot" style="background: #FF69B4;"></div> Relationships</div>
+    </div>
+
+    <div class="graph-controls">
+        <button class="control-btn" onclick="Graph.zoomToFit(400)">Center View</button>
+        <button class="control-btn" onclick="toggleLabels()">Toggle Labels</button>
+    </div>
+
+    <script>
+        const colors = {
+            knowledge: '#50C878',
+            principles: '#FFD700',
+            philosophies: '#00BFFF',
+            relationships: '#FF69B4'
+        };
+
+        let showLabels = true;
+
+        const Graph = ForceGraph()
+            (document.getElementById('graph-container'))
+            .graphData(BRAIN_STATS.graph)
+            .nodeId('id')
+            .nodeVal(node => {
+                // Node size based on level
+                const level = node.level ? parseInt(node.level.split('_')[0]) : 1;
+                return level * 3 + 5;
+            })
+            .nodeLabel(node => `
+                <div class="graph-tooltip">
+                    <strong>${node.title}</strong><br/>
+                    Pillar: ${node.group}<br/>
+                    Level: ${node.level || 'N/A'}
+                </div>
+            `)
+            .nodeColor(node => colors[node.group] || '#ffffff')
+            .linkColor(() => 'rgba(255, 255, 255, 0.1)')
+            .linkWidth(1)
+            .linkDirectionalParticles(2)
+            .linkDirectionalParticleSpeed(d => 0.005)
+            .onNodeClick(node => {
+                window.location.href = node.path;
+            })
+            .nodeCanvasObject((node, ctx, globalScale) => {
+                const label = node.title;
+                const fontSize = 12/globalScale;
+                ctx.font = `${fontSize}px Be Vietnam Pro`;
+                const textWidth = ctx.measureText(label).width;
+                const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
+
+                // Draw circle
+                const level = node.level ? parseInt(node.level.split('_')[0]) : 1;
+                const r = (level * 2 + 4) / globalScale;
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, r, 0, 2 * Math.PI, false);
+                ctx.fillStyle = colors[node.group] || '#ffffff';
+                ctx.fill();
+                
+                // Shadow/Glow effect
+                ctx.shadowColor = colors[node.group] || '#ffffff';
+                ctx.shadowBlur = 10;
+
+                if (showLabels) {
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                    ctx.fillText(label, node.x, node.y + r + (fontSize * 0.8));
+                }
+            });
+
+        function toggleLabels() {
+            showLabels = !showLabels;
+        }
+
+        // Adjust graph on window resize
+        window.addEventListener('resize', () => {
+            Graph.width(window.innerWidth);
+            Graph.height(window.innerHeight - 70);
+        });
+    </script>
+</body>
+</html>

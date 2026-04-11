@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Brain | Emerald Intelligence</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;600;800&family=Inter:wght@300;400;600&family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <script src="stats.js"></script>
+</head>
+<body>
+    <div class="background-glow"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">Digital Brain</a>
+            <div class="nav-links">
+                <a href="index.html">Dashboard</a>
+                <a href="brain_room.html">Brain Room</a>
+                <a href="prompts.html">Brain Input Support</a>
+                <a href="wiki_hub.html">Wiki Hub</a>
+                <a href="graph.html">Knowledge Graph</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="hero">
+            <h1 class="glitch">Digital Brain</h1>
+            <p class="subtitle">Personal Knowledge Synthesis System (PKSS)</p>
+        </header>
+
+        <section class="dashboard-grid">
+            <!-- PILLAR 1: KNOWLEDGE -->
+            <div class="card bento-large">
+                <span class="pillar-number">01</span>
+                <h2>📊 Tri thức sống (Knowledge)</h2>
+                <div class="status-list">
+                    <div class="status-item"><span class="status-label">Biết (Surface)</span> <span class="status-value" id="k-1">0</span></div>
+                    <div class="status-item"><span class="status-label">Hiểu (Deep)</span> <span class="status-value" id="k-2">0</span></div>
+                    <div class="status-item"><span class="status-label">Hành (Practice)</span> <span class="status-value" id="k-3">0</span></div>
+                    <div class="status-item"><span class="status-label">Thông (Pattern)</span> <span class="status-value" id="k-4">0</span></div>
+                    <div class="status-item"><span class="status-label">Tuệ (Wisdom)</span> <span class="status-value" id="k-5">0</span></div>
+                </div>
+                <div class="onboarding-questions">
+                    <strong>Hỏi ngược Tri thức:</strong>
+                    <div class="question-chip" title="Click to ask AI this">Làm sao để 'hành' điều này ngay hôm nay?</div>
+                    <div class="question-chip" title="Click to ask AI this">Bạn thấy mô thức nào lặp lại ở đây?</div>
+                </div>
+            </div>
+
+            <!-- PILLAR 4: RELATIONSHIPS -->
+            <div class="card bento-medium">
+                <span class="pillar-number">04</span>
+                <h2>🤝 Mối quan hệ</h2>
+                <div class="status-list">
+                    <div class="status-item"><span class="status-label">Biết</span> <span class="status-value" id="r-1">0</span></div>
+                    <div class="status-item"><span class="status-label">Quen</span> <span class="status-value" id="r-2">0</span></div>
+                    <div class="status-item"><span class="status-label">Thân</span> <span class="status-value" id="r-3">0</span></div>
+                    <div class="status-item"><span class="status-label">Thương</span> <span class="status-value" id="r-4">0</span></div>
+                    <div class="status-item"><span class="status-label">Yêu</span> <span class="status-value" id="r-5">0</span></div>
+                </div>
+                <div class="onboarding-questions">
+                    <strong>Khai phá 5W1H:</strong>
+                    <div class="question-chip">Kỷ niệm đáng nhớ nhất?</div>
+                    <div class="question-chip">Tại sao họ quan trọng?</div>
+                </div>
+            </div>
+
+            <!-- PILLAR 2: PRINCIPLES -->
+            <div class="card bento-wide">
+                <span class="pillar-number">02</span>
+                <h2>⚖️ Nguyên tắc sống</h2>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">Hệ thống ranh giới xác định tư duy Đúng / Sai.</p>
+                <div class="onboarding-questions">
+                    <div class="question-chip">Giá trị cốt lõi nào được bảo vệ?</div>
+                    <div class="question-chip">Quyết định nào khó khăn nhất?</div>
+                </div>
+            </div>
+
+            <!-- PILLAR 3: PHILOSOPHIES -->
+            <div class="card">
+                <span class="pillar-number">03</span>
+                <h2>🧘 Triết lý sống</h2>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">Hệ thống niềm tin về cuộc đời, con người, tương lai.</p>
+            </div>
+
+            <!-- PILLAR 5: RAW DATA -->
+            <div class="card">
+                <span class="pillar-number">05</span>
+                <h2>🧪 Dữ liệu thô & Ý tưởng</h2>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">Input: Ý tưởng bất chợt, cảm xúc, tài liệu nguồn chưa phân loại.</p>
+            </div>
+
+            <!-- MAGIC PROMPTS SECTION -->
+            <div class="card bento-wide" style="grid-column: span 3; border: 1px solid var(--accent-color);">
+                <span class="pillar-number">✨</span>
+                <h2>✨ Brain Input Support</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Dùng những câu hỏi này để bắt đầu kể chuyện cho Bộ não số của bạn. Hoặc truy cập kho dữ liệu khổng lồ:</p>
+                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                    <a href="prompts.html" class="btn-magic" style="text-decoration: none; display: inline-block;">MỞ THƯ VIỆN CÂU HỎI 🚀</a>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    <div class="onboarding-questions" style="margin-top: 0; border: none;">
+                        <strong style="color: var(--primary-color);">📊 Tri thức:</strong>
+                        <div class="question-chip">Làm sao để 'hành' điều này ngay?</div>
+                        <div class="question-chip">Mô thức lặp lại là gì?</div>
+                    </div>
+                    <div class="onboarding-questions" style="margin-top: 0; border: none;">
+                        <strong style="color: var(--primary-color);">🤝 Mối quan hệ:</strong>
+                        <div class="question-chip">Kỷ niệm đáng nhớ nhất?</div>
+                        <div class="question-chip">Họ quan trọng thế nào?</div>
+                    </div>
+                    <div class="onboarding-questions" style="margin-top: 0; border: none;">
+                        <strong style="color: var(--primary-color);">⚖️ Nguyên tắc:</strong>
+                        <div class="question-chip">Ranh giới này bảo vệ điều gì?</div>
+                        <div class="question-chip">Nó hình thành từ đâu?</div>
+                    </div>
+                    <div class="onboarding-questions" style="margin-top: 0; border: none;">
+                        <strong style="color: var(--primary-color);">🧘 Triết lý:</strong>
+                        <div class="question-chip">Niềm tin này đến từ biến cố nào?</div>
+                        <div class="question-chip">Nó giúp gì trong gian khó?</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LOGS & METRICS -->
+            <div class="card" style="border-style: dashed; grid-column: span 3;">
+                <h2>⚙️ Nhật ký Bộ não (Log)</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="status-list" style="flex: 1;">
+                        <div class="status-item"><span class="status-label">Hoạt động cuối:</span> <span class="status-value" id="last-sync-time">Hệ thống khởi tạo</span></div>
+                        <div class="status-item"><span class="status-label">Tình trạng:</span> <span class="status-value" style="color: #00ff88;">Optimized (Emerald)</span></div>
+                    </div>
+                    <div style="margin-left: 2rem;">
+                        <a href="wiki_hub.html" class="question-chip" style="background: var(--primary-color); color: var(--bg-color);">Xem Wiki Hub</a>
+                        <a href="wiki/log.md" class="question-chip">Xem Log</a>
+                        <a href="wiki/templates/exploration-framework.md" class="question-chip" style="border: 1px solid var(--accent-color);">Khung câu hỏi full</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>&copy; 2026 DIGITAL BRAIN — Vận hành theo tư duy <span>World-Class</span></p>
+        </footer>
+    </main>
+
+    <script>
+        // Update stats from BRAIN_STATS (from stats.js)
+        if (typeof BRAIN_STATS !== 'undefined') {
+            // Knowledge mapping
+            document.getElementById('k-1').innerText = BRAIN_STATS.knowledge["1_Biet"];
+            document.getElementById('k-2').innerText = BRAIN_STATS.knowledge["2_Hieu"];
+            document.getElementById('k-3').innerText = BRAIN_STATS.knowledge["3_Hanh"];
+            document.getElementById('k-4').innerText = BRAIN_STATS.knowledge["4_Thong"];
+            document.getElementById('k-5').innerText = BRAIN_STATS.knowledge["5_Tue"];
+
+            // Relationship mapping
+            document.getElementById('r-1').innerText = BRAIN_STATS.relationships["1_Biet"];
+            document.getElementById('r-2').innerText = BRAIN_STATS.relationships["2_Quen"];
+            document.getElementById('r-3').innerText = BRAIN_STATS.relationships["3_Than"];
+            document.getElementById('r-4').innerText = BRAIN_STATS.relationships["4_Thuong"];
+            document.getElementById('r-5').innerText = BRAIN_STATS.relationships["5_Yeu"];
+
+            // Meta mapping
+            document.getElementById('last-sync-time').innerText = BRAIN_STATS.last_sync;
+        }
+
+        // Animating the progress (visual opacity)
+        document.querySelectorAll('.status-value').forEach((el) => {
+            if (el.innerText === '0') {
+               el.style.opacity = '0.3';
+            } else {
+               el.style.opacity = '1';
+               el.style.color = 'var(--accent-color)';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiki Hub | Digital Brain</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;600;800&family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <script src="stats.js"></script>
+    <style>
+        .wiki-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .pillar-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 2rem;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+        .pillar-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-5px);
+            background: rgba(80, 200, 120, 0.05);
+        }
+        .pillar-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+        .pillar-icon {
+            font-size: 2rem;
+        }
+        .file-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+        .file-item {
+            margin-bottom: 0.8rem;
+        }
+        .file-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: var(--transition);
+        }
+        .file-link:hover {
+            background: var(--primary-color);
+            color: var(--bg-color);
+            transform: translateX(5px);
+        }
+        .file-level {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(80, 200, 120, 0.2);
+            color: var(--primary-color);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .file-link:hover .file-level {
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+        .empty-hint {
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-glow"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">Digital Brain</a>
+            <div class="nav-links">
+                <a href="index.html">Dashboard</a>
+                <a href="brain_room.html">Brain Room</a>
+                <a href="prompts.html">Brain Input Support</a>
+                <a href="wiki_hub.html" class="active">Wiki Hub</a>
+                <a href="graph.html">Knowledge Graph</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <header class="hero">
+            <h1 class="glitch" style="font-size: 3.5rem;">Wiki Hub</h1>
+            <p class="subtitle">Khám phá mạng lưới tri thức đã được cấu trúc hóa</p>
+        </header>
+
+        <div class="wiki-grid" id="wiki-explorer">
+            <!-- PILLAR: KNOWLEDGE -->
+            <div class="pillar-card">
+                <div class="pillar-header">
+                    <span class="pillar-icon">📊</span>
+                    <div>
+                        <h2 style="margin:0; font-size: 1.4rem;">Knowledge</h2>
+                        <small style="color: var(--primary-color)">Tri thức & Kinh nghiệm</small>
+                    </div>
+                </div>
+                <ul class="file-list" id="list-knowledge"></ul>
+            </div>
+
+            <!-- PILLAR: PRINCIPLES -->
+            <div class="pillar-card">
+                <div class="pillar-header">
+                    <span class="pillar-icon">⚖️</span>
+                    <div>
+                        <h2 style="margin:0; font-size: 1.4rem;">Principles</h2>
+                        <small style="color: var(--primary-color)">Nguyên tắc & Ranh giới</small>
+                    </div>
+                </div>
+                <ul class="file-list" id="list-principles"></ul>
+            </div>
+
+            <!-- PILLAR: PHILOSOPHIES -->
+            <div class="pillar-card">
+                <div class="pillar-header">
+                    <span class="pillar-icon">🧘</span>
+                    <div>
+                        <h2 style="margin:0; font-size: 1.4rem;">Philosophies</h2>
+                        <small style="color: var(--primary-color)">Triết lý & Niềm tin</small>
+                    </div>
+                </div>
+                <ul class="file-list" id="list-philosophies"></ul>
+            </div>
+
+            <!-- PILLAR: RELATIONSHIPS -->
+            <div class="pillar-card">
+                <div class="pillar-header">
+                    <span class="pillar-icon">🤝</span>
+                    <div>
+                        <h2 style="margin:0; font-size: 1.4rem;">Relationships</h2>
+                        <small style="color: var(--primary-color)">Mối quan hệ 5W1H</small>
+                    </div>
+                </div>
+                <ul class="file-list" id="list-relationships"></ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function renderFiles(pillarKey, elementId) {
+            const container = document.getElementById(elementId);
+            const files = BRAIN_STATS[pillarKey].files;
+
+            if (!files || files.length === 0) {
+                container.innerHTML = '<li class="empty-hint">Chưa có dữ liệu trong trụ cột này...</li>';
+                return;
+            }
+
+            files.forEach(file => {
+                const li = document.createElement('li');
+                li.className = 'file-item';
+                
+                // Format level label (e.g. 3_Hanh -> HÀNH)
+                const levelLabel = file.level ? file.level.split('_')[1] || file.level : 'N/A';
+
+                li.innerHTML = `
+                    <a href="${file.path}" class="file-link">
+                        <span>${file.title}</span>
+                        <span class="file-level">${levelLabel}</span>
+                    </a>
+                `;
+                container.appendChild(li);
+            });
+        }
+
+        if (typeof BRAIN_STATS !== 'undefined') {
+            renderFiles('knowledge', 'list-knowledge');
+            renderFiles('principles', 'list-principles');
+            renderFiles('philosophies', 'list-philosophies');
+            renderFiles('relationships', 'list-relationships');
+        }
+    </script>
+</body>
+</html>
