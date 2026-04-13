@@ -1,6 +1,6 @@
 # 🧠 DIGITAL BRAIN — Emerald Edition
 
-Hệ thống ghi chép và tự động tổ chức tri thức cá nhân theo kiến trúc **LLM-Wiki** của Andrej Karpathy, được tùy chỉnh sâu sắc cho tư duy **5 Trụ cột cốt lõi**.
+Hệ thống ghi chép và tự động tổ chức tri thức cá nhân theo kiến trúc **LLM-Wiki** của Andrej Karpathy, được tùy chỉnh sâu sắc cho tư duy **5 Trụ cột cốt lõi**, bổ sung thêm về chức năng học tập phát triển từ những vùng tri thức mới.
 
 ---
 
