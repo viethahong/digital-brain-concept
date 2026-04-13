@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wiki Hub | Digital Brain</title>
     <link rel="stylesheet" href="index.css">
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;600;800&family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="stats.js"></script>
     <style>
         .wiki-grid {
@@ -83,6 +83,33 @@
             font-style: italic;
             font-size: 0.9rem;
         }
+        .item-wrapper {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .trash-btn {
+            background: rgba(255, 60, 60, 0.1);
+            border: 1px solid rgba(255, 60, 60, 0.2);
+            color: #ff8888;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            opacity: 0;
+        }
+        .file-item:hover .trash-btn {
+            opacity: 1;
+        }
+        .trash-btn:hover {
+            background: #ff4444;
+            color: white;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -94,9 +121,11 @@
             <div class="nav-links">
                 <a href="index.html">Dashboard</a>
                 <a href="brain_room.html">Brain Room</a>
-                <a href="prompts.html">Brain Input Support</a>
                 <a href="wiki_hub.html" class="active">Wiki Hub</a>
                 <a href="graph.html">Knowledge Graph</a>
+                <a href="learn.html">Learn</a>
+                <a href="chat.html">Chat</a>
+                <button id="theme-toggle" class="theme-toggle" title="Chuyển chế độ Sáng/Tối">☀️</button>
             </div>
         </div>
     </nav>
@@ -155,9 +184,33 @@
                 </div>
                 <ul class="file-list" id="list-relationships"></ul>
             </div>
+
+            <!-- PILLAR: INCUBATOR -->
+            <div class="pillar-card" style="border-style: dashed; border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.01)">
+                <div class="pillar-header">
+                    <span class="pillar-icon">🌱</span>
+                    <div>
+                        <h2 style="margin:0; font-size: 1.4rem; color: #AAAAAA;">Incubator</h2>
+                        <small style="color: #666666">Vùng ủ mầm (Outside)</small>
+                    </div>
+                </div>
+                <ul class="file-list" id="list-incubator"></ul>
+            </div>
         </div>
     </main>
 
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-container">
+            <a href="index.html" class="mobile-nav-item"><span>🏠</span>Dashboard</a>
+            <a href="brain_room.html" class="mobile-nav-item"><span>🛠️</span>Room</a>
+            <a href="wiki_hub.html" class="mobile-nav-item active"><span>📚</span>Wiki</a>
+            <a href="chat.html" class="mobile-nav-item"><span>💬</span>Chat</a>
+            <a href="learn.html" class="mobile-nav-item"><span>🎓</span>Learn</a>
+        </div>
+    </nav>
+
+    <script src="theme.js"></script>
     <script>
         function renderFiles(pillarKey, elementId) {
             const container = document.getElementById(elementId);
@@ -176,10 +229,13 @@
                 const levelLabel = file.level ? file.level.split('_')[1] || file.level : 'N/A';
 
                 li.innerHTML = `
-                    <a href="${file.path}" class="file-link">
-                        <span>${file.title}</span>
-                        <span class="file-level">${levelLabel}</span>
-                    </a>
+                    <div class="item-wrapper">
+                        <a href="viewer.html?file=${file.path}" target="_blank" class="file-link" style="flex-grow: 1;">
+                            <span>${file.title}</span>
+                            <span class="file-level">${levelLabel}</span>
+                        </a>
+                        <button class="trash-btn" onclick="moveToTrash('${file.path}', this)" title="Bỏ vào thùng rác">🗑️</button>
+                    </div>
                 `;
                 container.appendChild(li);
             });
@@ -190,6 +246,31 @@
             renderFiles('principles', 'list-principles');
             renderFiles('philosophies', 'list-philosophies');
             renderFiles('relationships', 'list-relationships');
+            renderFiles('incubator', 'list-incubator');
+        }
+
+        async function moveToTrash(filePath, btn) {
+            if (!confirm('Bạn có chắc chắn muốn bỏ file này vào thùng rác?')) return;
+
+            try {
+                const response = await fetch('/trash', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ file_path: filePath })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    const item = btn.closest('.file-item');
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateX(20px)';
+                    setTimeout(() => item.remove(), 400);
+                } else {
+                    alert('Lỗi: ' + result.message);
+                }
+            } catch (err) {
+                alert('Lỗi kết nối server: ' + err.message);
+            }
         }
     </script>
 </body>

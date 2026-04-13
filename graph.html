@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Knowledge Graph | Digital Brain</title>
     <link rel="stylesheet" href="index.css">
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;600;800&family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="stats.js"></script>
     <script src="https://unpkg.com/force-graph"></script>
     <style>
@@ -17,7 +17,12 @@
             width: 100vw;
             height: calc(100vh - 70px);
             margin-top: 70px;
-            background: #0a0a0a;
+            background: var(--bg-color);
+        }
+        @media (max-width: 768px) {
+            #graph-container {
+                height: calc(100vh - 140px);
+            }
         }
         .graph-tooltip {
             background: rgba(0, 0, 0, 0.8);
@@ -86,9 +91,11 @@
             <div class="nav-links">
                 <a href="index.html">Dashboard</a>
                 <a href="brain_room.html">Brain Room</a>
-                <a href="prompts.html">Brain Input Support</a>
                 <a href="wiki_hub.html">Wiki Hub</a>
                 <a href="graph.html" class="active">Knowledge Graph</a>
+                <a href="learn.html">Learn</a>
+                <a href="chat.html">Chat</a>
+                <button id="theme-toggle" class="theme-toggle" title="Chuyển chế độ Sáng/Tối">☀️</button>
             </div>
         </div>
     </nav>
@@ -100,6 +107,7 @@
         <div class="legend-item"><div class="dot" style="background: #FFD700;"></div> Principles</div>
         <div class="legend-item"><div class="dot" style="background: #00BFFF;"></div> Philosophies</div>
         <div class="legend-item"><div class="dot" style="background: #FF69B4;"></div> Relationships</div>
+        <div class="legend-item"><div class="dot" style="background: #AAAAAA;"></div> Incubator</div>
     </div>
 
     <div class="graph-controls">
@@ -107,12 +115,26 @@
         <button class="control-btn" onclick="toggleLabels()">Toggle Labels</button>
     </div>
 
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-container">
+            <a href="index.html" class="mobile-nav-item"><span>🏠</span>Dashboard</a>
+            <a href="brain_room.html" class="mobile-nav-item"><span>🛠️</span>Room</a>
+            <a href="wiki_hub.html" class="mobile-nav-item"><span>📚</span>Wiki</a>
+            <a href="graph.html" class="mobile-nav-item active"><span>📊</span>Graph</a>
+            <a href="chat.html" class="mobile-nav-item"><span>💬</span>Chat</a>
+            <a href="learn.html" class="mobile-nav-item"><span>🎓</span>Learn</a>
+        </div>
+    </nav>
+
+    <script src="theme.js"></script>
     <script>
         const colors = {
             knowledge: '#50C878',
             principles: '#FFD700',
             philosophies: '#00BFFF',
-            relationships: '#FF69B4'
+            relationships: '#FF69B4',
+            incubator: '#AAAAAA'
         };
 
         let showLabels = true;
@@ -139,7 +161,21 @@
             .linkDirectionalParticles(2)
             .linkDirectionalParticleSpeed(d => 0.005)
             .onNodeClick(node => {
-                window.location.href = node.path;
+                console.log('Opening file:', node.path);
+                if (!node.path) {
+                    alert('Lỗi: Node này không có đường dẫn file!');
+                    return;
+                }
+                const viewerUrl = 'viewer.html?file=' + encodeURIComponent(node.path);
+                window.location.href = viewerUrl;
+            })
+            .nodePointerAreaPaint((node, color, ctx, globalScale) => {
+                const level = node.level ? parseInt(node.level.split('_')[0]) : 1;
+                const r = (level * 2 + 10) / globalScale; // Larger click area
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, r, 0, 2 * Math.PI, false);
+                ctx.fillStyle = color;
+                ctx.fill();
             })
             .nodeCanvasObject((node, ctx, globalScale) => {
                 const label = node.title;
@@ -171,6 +207,13 @@
         function toggleLabels() {
             showLabels = !showLabels;
         }
+
+        // Adjust forces to prevent nodes from clumping
+        Graph.d3Force('charge').strength(-400);
+        Graph.d3Force('link').distance(100);
+
+        // Default to center view when initial layout settles
+        Graph.onEngineStop(() => Graph.zoomToFit(400));
 
         // Adjust graph on window resize
         window.addEventListener('resize', () => {

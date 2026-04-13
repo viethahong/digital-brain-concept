@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brain Room | Emerald Intelligence</title>
     <link rel="stylesheet" href="index.css">
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;600;800&family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="stats.js"></script>
     <script src="inquiry.js"></script>
     <style>
@@ -14,6 +14,11 @@
             grid-template-columns: 1fr 1fr;
             gap: 2rem;
             margin-top: 2rem;
+        }
+        @media (max-width: 768px) {
+            .room-grid {
+                grid-template-columns: 1fr;
+            }
         }
         .inquiry-scroll {
             display: flex;
@@ -105,6 +110,9 @@
                 <a href="brain_room.html" class="active">Brain Room</a>
                 <a href="wiki_hub.html">Wiki Hub</a>
                 <a href="graph.html">Knowledge Graph</a>
+                <a href="learn.html">Learn</a>
+                <a href="chat.html">Chat</a>
+                <button id="theme-toggle" class="theme-toggle" title="Chuyển chế độ Sáng/Tối">☀️</button>
             </div>
         </div>
     </nav>
@@ -139,6 +147,18 @@
         </div>
     </main>
 
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-container">
+            <a href="index.html" class="mobile-nav-item"><span>🏠</span>Dashboard</a>
+            <a href="brain_room.html" class="mobile-nav-item active"><span>🛠️</span>Room</a>
+            <a href="wiki_hub.html" class="mobile-nav-item"><span>📚</span>Wiki</a>
+            <a href="chat.html" class="mobile-nav-item"><span>💬</span>Chat</a>
+            <a href="learn.html" class="mobile-nav-item"><span>🎓</span>Learn</a>
+        </div>
+    </nav>
+
+    <script src="theme.js"></script>
     <script>
         // Render inquiries from BRAIN_INQUIRIES
         function renderInquiries() {
@@ -168,17 +188,48 @@
             document.getElementById('char-count').innerText = this.value.length + " chars";
         };
 
-        function handleIngest() {
+        async function handleIngest() {
             const content = document.getElementById('brain-thought').value;
             if (!content.trim()) return alert("Vui lòng nhập nội dung!");
             
-            // In a real environment, this would call an API. 
-            // In this workspace, I (the AI) will monitor this and execute /ingest.
-            alert("Đã nhận dữ liệu! Tôi (Antigravity) sẽ bắt đầu tạo file raw/ và Ingest ngay bây giờ.");
-            console.log("SENDING TO AI:", content);
-            
-            // Clear input
-            // document.getElementById('brain-thought').value = "";
+            const btn = document.querySelector('.btn-ingest');
+            const originalText = btn.innerText;
+            btn.innerText = 'AI ĐANG TIÊU HÓA... ⏳';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/ingest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: content })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    btn.innerText = 'ĐÃ LƯU THÀNH CÔNG! ✅';
+                    btn.style.background = '#00ff88';
+                    btn.style.color = '#000';
+                    alert(`Tri thức đã được phân loại là [${result.type.toUpperCase()}] và lưu tại:\n${result.path}`);
+                    
+                    document.getElementById('brain-thought').value = "";
+                    document.getElementById('char-count').innerText = "0 chars";
+                    
+                    setTimeout(() => {
+                        btn.innerText = originalText;
+                        btn.style.background = '';
+                        btn.style.color = '';
+                        btn.disabled = false;
+                    }, 3000);
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error("Ingest failed:", error);
+                alert(`Lỗi: ${error.message}\nĐảm bảo Brain Engine đang chạy (python3 brain_server.py).`);
+                btn.innerText = 'THỬ LẠI';
+                btn.disabled = false;
+            }
         }
 
         renderInquiries();

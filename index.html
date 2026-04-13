@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digital Brain | Emerald Intelligence</title>
     <link rel="stylesheet" href="index.css">
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;600;800&family=Inter:wght@300;400;600&family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="stats.js"></script>
 </head>
 <body>
@@ -15,11 +15,13 @@
         <div class="nav-container">
             <a href="index.html" class="nav-logo">Digital Brain</a>
             <div class="nav-links">
-                <a href="index.html">Dashboard</a>
+                <a href="index.html" class="active">Dashboard</a>
                 <a href="brain_room.html">Brain Room</a>
-                <a href="prompts.html">Brain Input Support</a>
                 <a href="wiki_hub.html">Wiki Hub</a>
                 <a href="graph.html">Knowledge Graph</a>
+                <a href="learn.html">Learn</a>
+                <a href="chat.html">Chat</a>
+                <button id="theme-toggle" class="theme-toggle" title="Chuyển chế độ Sáng/Tối">☀️</button>
             </div>
         </div>
     </nav>
@@ -85,11 +87,15 @@
                 <p style="color: var(--text-secondary); font-size: 0.9rem;">Hệ thống niềm tin về cuộc đời, con người, tương lai.</p>
             </div>
 
-            <!-- PILLAR 5: RAW DATA -->
-            <div class="card">
+            <!-- PILLAR 5: INCUBATOR (OUTSIDE) -->
+            <div class="card" style="border: 1px dashed var(--text-secondary);">
                 <span class="pillar-number">05</span>
-                <h2>🧪 Dữ liệu thô & Ý tưởng</h2>
-                <p style="color: var(--text-secondary); font-size: 0.9rem;">Input: Ý tưởng bất chợt, cảm xúc, tài liệu nguồn chưa phân loại.</p>
+                <h2>🌱 Vườn ươm (Incubator)</h2>
+                <div class="status-list">
+                    <div class="status-item"><span class="status-label">Hạt giống (Seeds):</span> <span class="status-value" id="i-count">0</span></div>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.8rem; margin: 1rem 0;">Tri thức Outside đang đợi được kết nối.</p>
+                <a href="learn.html" class="question-chip" style="background: var(--accent-color); color: var(--bg-color); width: 100%; text-align: center; margin: 0; font-weight: 800;">START LEARNING →</a>
             </div>
 
             <!-- MAGIC PROMPTS SECTION -->
@@ -134,8 +140,8 @@
                     </div>
                     <div style="margin-left: 2rem;">
                         <a href="wiki_hub.html" class="question-chip" style="background: var(--primary-color); color: var(--bg-color);">Xem Wiki Hub</a>
-                        <a href="wiki/log.md" class="question-chip">Xem Log</a>
-                        <a href="wiki/templates/exploration-framework.md" class="question-chip" style="border: 1px solid var(--accent-color);">Khung câu hỏi full</a>
+                        <a href="viewer.html?file=wiki/log.md" class="question-chip">Xem Log</a>
+                        <a href="viewer.html?file=wiki/templates/exploration-framework.md" class="question-chip" style="border: 1px solid var(--accent-color);">Khung câu hỏi full</a>
                     </div>
                 </div>
             </div>
@@ -146,6 +152,18 @@
         </footer>
     </main>
 
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-container">
+            <a href="index.html" class="mobile-nav-item active"><span>🏠</span>Dashboard</a>
+            <a href="brain_room.html" class="mobile-nav-item"><span>🛠️</span>Room</a>
+            <a href="wiki_hub.html" class="mobile-nav-item"><span>📚</span>Wiki</a>
+            <a href="chat.html" class="mobile-nav-item"><span>💬</span>Chat</a>
+            <a href="learn.html" class="mobile-nav-item"><span>🎓</span>Learn</a>
+        </div>
+    </nav>
+
+    <script src="theme.js"></script>
     <script>
         // Update stats from BRAIN_STATS (from stats.js)
         if (typeof BRAIN_STATS !== 'undefined') {
@@ -165,6 +183,11 @@
 
             // Meta mapping
             document.getElementById('last-sync-time').innerText = BRAIN_STATS.last_sync;
+
+            // Incubator mapping
+            if (BRAIN_STATS.incubator) {
+                document.getElementById('i-count').innerText = BRAIN_STATS.incubator.files.length;
+            }
         }
 
         // Animating the progress (visual opacity)

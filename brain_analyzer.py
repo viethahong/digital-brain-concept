@@ -1,18 +1,11 @@
-import os
 import json
 import random
 
-# Paths (Use relative paths)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-STATS_JS = os.path.join(BASE_DIR, "stats.js")
-INQUIRY_JS = os.path.join(BASE_DIR, "inquiry.js")
+STATS_JS = "/Users/viethahong/Documents/digital-brain/stats.js"
+INQUIRY_JS = "/Users/viethahong/Documents/digital-brain/inquiry.js"
 
 def analyze():
     try:
-        if not os.path.exists(STATS_JS):
-            print("Stats file not found. Run brain_sync.py first.")
-            return
-
         with open(STATS_JS, 'r', encoding='utf-8') as f:
             content = f.read()
             # Extract JSON from "const BRAIN_STATS = {...};"

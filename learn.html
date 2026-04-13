@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn | Digital Brain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <style>
+        .learn-container {
+            max-width: 800px;
+            margin: 4rem auto;
+            perspective: 1500px;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        @media (max-width: 768px) {
+            .learn-container {
+                margin: 1rem auto;
+                min-height: 400px;
+            }
+            .flashcard-wrapper {
+                height: 450px !important;
+            }
+        }
+
+        .flashcard-wrapper {
+            width: 100%;
+            height: 500px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+
+        .flashcard-wrapper.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 32px;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid var(--border-color);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .card-front {
+            z-index: 2;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background: rgba(15, 45, 30, 0.8);
+            border-color: var(--primary-color);
+        }
+
+        .seed-category {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .seed-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            color: #fff;
+        }
+
+        .seed-preview {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            border-left: 3px solid var(--primary-color);
+            padding-left: 1.5rem;
+        }
+
+        .tap-hint {
+            margin-top: auto;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--primary-color);
+            opacity: 0.6;
+            animation: pulse 2s infinite;
+        }
+
+        .anchor-title {
+            font-size: 1rem;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .anchor-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .anchor-item {
+            display: inline-block;
+            background: rgba(80, 200, 120, 0.1);
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 1rem;
+            border-radius: 12px;
+            margin: 0.3rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .synthesis-box {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            color: #fff;
+            font-family: inherit;
+            resize: none;
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .synthesis-box:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: rgba(0,0,0,0.5);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: var(--bg-color);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-danger {
+            background: rgba(255, 50, 50, 0.05);
+            color: #ff5555;
+            border: 1px solid rgba(255, 50, 50, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: #ff3232;
+            color: #fff;
+            border-color: #ff3232;
+            box-shadow: 0 0 15px rgba(255, 50, 50, 0.4);
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+
+        .progress-indicator {
+            margin-bottom: 2.5rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .mastery-progress-wrapper {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .mastery-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #50C878, #00ff88);
+            box-shadow: 0 0 15px var(--primary-color);
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .missing-concepts-list {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+            text-align: left;
+        }
+
+        .missing-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 8px;
+            color: #ffcccc;
+            font-size: 0.85rem;
+        }
+
+        .missing-item::before {
+            content: "⭕";
+            font-size: 0.7rem;
+            margin-top: 3px;
+        }
+
+        .controls {
+            margin-top: 3rem;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .control-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+
+        .control-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        #empty-state {
+            display: none;
+            text-align: center;
+            padding: 4rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-glow"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">DIGITAL BRAIN</a>
+            <div class="nav-links">
+                <a href="index.html">Dashboard</a>
+                <a href="brain_room.html">Brain Room</a>
+                <a href="wiki_hub.html">Wiki Hub</a>
+                <a href="graph.html">Knowledge Graph</a>
+                <a href="learn.html" class="active">Learn</a>
+                <a href="chat.html">Chat</a>
+                <button id="theme-toggle" class="theme-toggle" title="Chuyển chế độ Sáng/Tối">☀️</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="learn-container">
+            <div class="progress-indicator">
+                <div style="width: 100%; display: flex; justify-content: space-between;">
+                    <span>MASTERY PROGRESS</span>
+                    <span><span id="current-index">0</span> / <span id="total-seeds">0</span> SEEDS</span>
+                </div>
+                <div class="mastery-progress-wrapper">
+                    <div id="mastery-bar" class="mastery-progress-bar"></div>
+                </div>
+            </div>
+
+            <div id="flashcard" class="flashcard-wrapper">
+                <!-- Front Side -->
+                <div class="card-face card-front" id="card-front">
+                    <div class="seed-category">🌱 Incubator Seed</div>
+                    <div class="seed-title" id="seed-title">...</div>
+                    <div class="seed-preview" id="seed-preview">
+                        Click to flip and connect this knowledge with your existing brain.
+                    </div>
+                    <div class="tap-hint">TAP TO FLIP</div>
+                </div>
+
+                <!-- Back Side -->
+                <div class="card-face card-back" id="card-back">
+                    <div class="anchor-title">🔗 Inside Anchors</div>
+                    <div class="anchor-list" id="anchor-list">
+                        <!-- Anchors will be populated here -->
+                    </div>
+                    
+                    <textarea class="synthesis-box" id="synthesis-input" placeholder="Ghi lại sự kết nối hoặc chiêm nghiệm của bạn tại đây..."></textarea>
+                    
+                    <div id="ai-feedback" style="display: none; padding: 1.5rem; border-radius: 16px; margin-bottom: 1.5rem; background: rgba(255, 50, 50, 0.05); border: 1px solid rgba(255, 50, 50, 0.2); color: #fff; font-size: 0.95rem; line-height: 1.5;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <strong style="color: #ffaa55; font-family: 'Outfit';">🔍 AI EVALUATION</strong>
+                            <span id="progress-percent" style="font-weight: 800; color: var(--primary-color);">0%</span>
+                        </div>
+                        <p id="feedback-text" style="color: var(--text-secondary); margin-bottom: 1rem;"></p>
+                        <div id="missing-points-container" style="display: none;">
+                            <div style="font-size: 0.8rem; font-weight: 700; color: #ff3232; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.5rem;">CẦN BỔ SUNG:</div>
+                            <ul id="missing-list" class="missing-concepts-list"></ul>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" onclick="flipCard(event)">Back</button>
+                        <button class="btn btn-danger" onclick="forgetSeed(event)">Quên tri thức</button>
+                        <button class="btn btn-primary" onclick="promoteSeed(event)">Promote & Merge</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="empty-state">
+                <div class="seed-title">Vườn ươm đang trống!</div>
+                <p>Hãy thêm các tri thức "Outside" mới để bắt đầu rèn luyện.</p>
+                <div class="controls">
+                    <a href="wiki_hub.html" class="control-btn">Về Wiki Hub</a>
+                </div>
+            </div>
+
+            <div class="controls" id="learn-controls">
+                <button class="control-btn" onclick="prevSeed()">Previous</button>
+                <button class="control-btn" onclick="nextSeed()">Next Seed</button>
+                <button class="control-btn" onclick="shuffleSeeds()">Shuffle</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="stats.js"></script>
+    <script>
+        let incubatorFiles = BRAIN_STATS.incubator.files || [];
+        let currentIndex = 0;
+        let isFlipped = false;
+
+        function init() {
+            if (incubatorFiles.length === 0) {
+                document.getElementById('flashcard').style.display = 'none';
+                document.getElementById('learn-controls').style.display = 'none';
+                document.getElementById('empty-state').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('total-seeds').innerText = incubatorFiles.length;
+            renderSeed();
+        }
+
+        function renderSeed() {
+            const seed = incubatorFiles[currentIndex];
+            document.getElementById('current-index').innerText = currentIndex + 1;
+            document.getElementById('seed-title').innerText = seed.title;
+            
+            // Logic tìm anchors từ graph links
+            const seedId = slugify(seed.title);
+            const anchors = findAnchors(seedId);
+            const anchorList = document.getElementById('anchor-list');
+            anchorList.innerHTML = '';
+            
+            if (anchors.length > 0) {
+                anchors.forEach(a => {
+                    const span = document.createElement('span');
+                    span.className = 'anchor-item';
+                    span.innerText = `[[${a}]]`;
+                    anchorList.appendChild(span);
+                });
+            } else {
+                anchorList.innerHTML = '<span class="status-label">No direct anchors found. Use search to link manually.</span>';
+            }
+            
+            // Reset flipped state and Feedback
+            isFlipped = false;
+            document.getElementById('flashcard').classList.remove('is-flipped');
+            document.getElementById('synthesis-input').value = '';
+            document.getElementById('ai-feedback').style.display = 'none';
+        }
+
+        function findAnchors(seedId) {
+            const links = BRAIN_STATS.graph.links;
+            const related = new Set();
+            links.forEach(l => {
+                if (l.source === seedId) related.add(l.target);
+                if (l.target === seedId) related.add(l.source);
+            });
+            return Array.from(related).map(id => {
+                const node = BRAIN_STATS.graph.nodes.find(n => n.id === id);
+                return node ? node.title : id;
+            });
+        }
+
+        function flipCard(e) {
+            e.stopPropagation();
+            const card = document.getElementById('flashcard');
+            isFlipped = !isFlipped;
+            if (isFlipped) card.classList.add('is-flipped');
+            else card.classList.remove('is-flipped');
+        }
+
+        // Add flip listener to front face
+        document.getElementById('card-front').addEventListener('click', flipCard);
+
+        function nextSeed() {
+            currentIndex = (currentIndex + 1) % incubatorFiles.length;
+            renderSeed();
+        }
+
+        function prevSeed() {
+            currentIndex = (currentIndex - 1 + incubatorFiles.length) % incubatorFiles.length;
+            renderSeed();
+        }
+
+        function shuffleSeeds() {
+            incubatorFiles.sort(() => Math.random() - 0.5);
+            currentIndex = 0;
+            renderSeed();
+        }
+
+        async function promoteSeed(e) {
+            e.stopPropagation();
+            const seed = incubatorFiles[currentIndex];
+            const synthesis = document.getElementById('synthesis-input').value;
+            
+            if (!synthesis.trim()) {
+                alert('Vui lòng nhập chiêm nghiệm của bạn để "neo" tri thức này trước khi Promote!');
+                return;
+            }
+
+            const btn = e.target;
+            const originalText = btn.innerText;
+            btn.innerText = 'PROMOTING...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/promote', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        file_path: seed.path,
+                        synthesis: synthesis
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    const score = result.score || 0;
+                    document.getElementById('mastery-bar').style.width = score + '%';
+                    
+                    if (score >= 100) {
+                        btn.innerText = `MASTERED! (100%) ✅`;
+                        btn.style.background = '#00ff88';
+                        btn.style.color = '#000';
+                        document.getElementById('ai-feedback').style.display = 'none';
+                        
+                        setTimeout(() => {
+                            incubatorFiles.splice(currentIndex, 1);
+                            if (incubatorFiles.length === 0) {
+                                init();
+                            } else {
+                                currentIndex = currentIndex % incubatorFiles.length;
+                                renderSeed();
+                                btn.innerText = originalText;
+                                btn.style.background = '';
+                                btn.style.color = '';
+                                btn.disabled = false;
+                            }
+                        }, 2000);
+                    } else {
+                        // Partial Success
+                        btn.innerText = `UPDATED (${score}%)`;
+                        btn.disabled = false;
+                        
+                        // Show missing concepts as hints
+                        const feedbackBox = document.getElementById('ai-feedback');
+                        feedbackBox.style.display = 'block';
+                        feedbackBox.style.background = 'rgba(80, 200, 120, 0.05)';
+                        feedbackBox.style.borderColor = 'rgba(80, 200, 120, 0.2)';
+                        
+                        document.getElementById('feedback-text').innerText = result.message;
+                        document.getElementById('progress-percent').innerText = score + '%';
+                        
+                        const missingList = document.getElementById('missing-list');
+                        const missingContainer = document.getElementById('missing-points-container');
+                        missingList.innerHTML = '';
+                        
+                        if (result.missing && result.missing.length > 0) {
+                            missingContainer.style.display = 'block';
+                            result.missing.forEach(point => {
+                                const li = document.createElement('li');
+                                li.className = 'missing-item';
+                                li.innerText = point;
+                                missingList.appendChild(li);
+                            });
+                        } else {
+                            missingContainer.style.display = 'none';
+                        }
+                    }
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error("Promotion failed:", error);
+                const feedbackBox = document.getElementById('ai-feedback');
+                if (feedbackBox) {
+                    feedbackBox.style.display = 'block';
+                    document.getElementById('feedback-text').innerText = error.message;
+                    const synBox = document.getElementById('synthesis-input');
+                    synBox.style.borderColor = '#ff3232';
+                    setTimeout(() => synBox.style.borderColor = 'var(--border-color)', 2000);
+                } else {
+                    alert(`Lỗi thực thi: ${error.message}`);
+                }
+                btn.innerText = 'THỬ LẠI (TRY AGAIN)';
+                btn.disabled = false;
+            }
+        }
+
+        async function forgetSeed(e) {
+            e.stopPropagation();
+            if (!confirm('Bạn có chắc chắn muốn XÓA tri thức này khỏi bộ não số? (File sẽ được chuyển vào thùng rác)')) return;
+
+            const seed = incubatorFiles[currentIndex];
+            const btn = e.target;
+            btn.innerText = 'FORGETTING...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/trash', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        file_path: seed.path
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    btn.innerText = `FORGOTTEN 🗑️`;
+                    
+                    setTimeout(() => {
+                        incubatorFiles.splice(currentIndex, 1);
+                        if (incubatorFiles.length === 0) {
+                            init();
+                        } else {
+                            currentIndex = currentIndex % incubatorFiles.length;
+                            renderSeed();
+                            btn.innerText = 'Quên tri thức';
+                            btn.disabled = false;
+                        }
+                    }, 1000);
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error("Forget failed:", error);
+                alert(`Lỗi khi xóa: ${error.message}`);
+                btn.innerText = 'Quên tri thức';
+                btn.disabled = false;
+            }
+        }
+
+        function slugify(text) {
+            return text.toString().toLowerCase()
+                .replace(/\s+/g, '-')           // Replace spaces with -
+                .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+                .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+                .replace(/^-+/, '')             // Trim - from start of text
+                .replace(/-+$/, '');            // Trim - from end of text
+        }
+
+        init();
+    </script>
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-container">
+            <a href="index.html" class="mobile-nav-item"><span>🏠</span>Dashboard</a>
+            <a href="brain_room.html" class="mobile-nav-item"><span>🛠️</span>Room</a>
+            <a href="wiki_hub.html" class="mobile-nav-item"><span>📚</span>Wiki</a>
+            <a href="chat.html" class="mobile-nav-item"><span>💬</span>Chat</a>
+            <a href="learn.html" class="mobile-nav-item active"><span>🎓</span>Learn</a>
+        </div>
+    </nav>
+
+    <script src="theme.js"></script>
+</body>
+</html>

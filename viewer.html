@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Viewer | Digital Brain</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Marked.js for parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Highlight.js for code -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        :root {
+            --viewer-width: 900px;
+        }
+        .viewer-container {
+            max-width: var(--viewer-width);
+            margin: 6rem auto 4rem;
+            padding: 3rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 32px;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.8s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .markdown-body {
+            color: var(--text-main);
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+        .markdown-body h1 {
+            font-size: 2.8rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+           -webkit-background-clip: text;
+           -webkit-text-fill-color: transparent;
+           border-bottom: 2px solid var(--border-color);
+           padding-bottom: 1rem;
+        }
+        .markdown-body h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1.2rem;
+            color: var(--primary-color);
+        }
+        .markdown-body h3 {
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            color: var(--accent-color);
+        }
+        .markdown-body p {
+            margin-bottom: 1.5rem;
+        }
+        .markdown-body ul, .markdown-body ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+        .markdown-body li {
+            margin-bottom: 0.5rem;
+        }
+        .markdown-body code {
+            font-family: 'Fira Code', monospace;
+            background: rgba(80, 200, 120, 0.1);
+            color: var(--accent-color);
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        .markdown-body pre {
+            background: #0d1117;
+            padding: 1.5rem;
+            border-radius: 16px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border: 1px solid var(--border-color);
+        }
+        .markdown-body pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        .markdown-body blockquote {
+            border-left: 4px solid var(--primary-color);
+            background: rgba(80, 200, 120, 0.05);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0 16px 16px 0;
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+        .markdown-body img {
+            max-width: 100%;
+            border-radius: 16px;
+            margin: 2rem 0;
+            box-shadow: var(--shadow);
+        }
+        .markdown-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+        }
+        .markdown-body th, .markdown-body td {
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+        .markdown-body th {
+            background: rgba(80, 200, 120, 0.1);
+            color: var(--primary-color);
+        }
+        .back-btn {
+            position: fixed;
+            top: 6rem;
+            left: 2rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+        .back-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: translateX(-5px);
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        .error-msg {
+            color: #ff6b6b;
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 107, 107, 0.2);
+        }
+        @media (max-width: 768px) {
+            .viewer-container {
+                margin: 5rem 1rem 5rem;
+                padding: 1.5rem;
+            }
+            .back-btn {
+                position: static;
+                margin-bottom: 2rem;
+                display: inline-flex;
+            }
+            .markdown-body h1 { font-size: 2rem; }
+        }
+
+        /* Editor Styles */
+        .editor-container {
+            display: none;
+            width: 100%;
+        }
+        .editor-box {
+            width: 100%;
+            height: 70vh;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            color: #fff;
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+            line-height: 1.6;
+            resize: vertical;
+            margin-bottom: 2rem;
+            outline: none;
+            transition: var(--transition);
+        }
+        .editor-box:focus {
+            border-color: var(--primary-color);
+            background: rgba(0,0,0,0.5);
+            box-shadow: 0 0 20px rgba(80, 200, 120, 0.1);
+        }
+        .actions-group {
+            position: fixed;
+            top: 6rem;
+            right: 2rem;
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+        }
+        .action-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+        }
+        .action-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        .action-btn.primary {
+            background: var(--primary-color);
+            color: var(--bg-color);
+            border: none;
+        }
+        .action-btn.primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        .status-badge {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            background: var(--primary-color);
+            color: var(--bg-color);
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 1000;
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-glow"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">Digital Brain</a>
+            <div class="nav-links">
+                <a href="index.html">Dashboard</a>
+                <a href="brain_room.html">Brain Room</a>
+                <a href="wiki_hub.html">Wiki Hub</a>
+                <a href="graph.html">Knowledge Graph</a>
+                <a href="learn.html">Learn</a>
+                <a href="chat.html">Chat</a>
+                <button id="theme-toggle" class="theme-toggle">☀️</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <a href="wiki_hub.html" class="back-btn">← Quay lại Wiki</a>
+        
+        <div class="actions-group">
+            <button id="edit-btn" class="action-btn" onclick="toggleEdit()">
+                <span>✏️</span> Sửa tri thức
+            </button>
+            <div id="editor-actions" style="display: none; gap: 1rem;">
+                <button class="action-btn" onclick="toggleEdit()">Hủy</button>
+                <button class="action-btn primary" onclick="saveContent()">
+                    <span>💾</span> Lưu thay đổi (Ctrl+S)
+                </button>
+            </div>
+        </div>
+
+        <div class="viewer-container">
+            <div id="content" class="markdown-body">
+                <div class="loading">Đang tải tri thức... 🧠</div>
+            </div>
+            <div id="editor-container" class="editor-container">
+                <textarea id="editor-box" class="editor-box" placeholder="Bắt đầu viết tri thức của bạn..."></textarea>
+            </div>
+        </div>
+
+        <div id="status-badge" class="status-badge">Đang lưu...</div>
+    </main>
+
+    <script src="theme.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const filePath = params.get('file');
+            
+            if (!filePath) {
+                document.getElementById('content').innerHTML = '<div class="error-msg">Lỗi: Không tìm thấy đường dẫn file.</div>';
+                return;
+            }
+
+            // Configure marked with highlight.js
+            marked.setOptions({
+                highlight: function(code, lang) {
+                    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                    return hljs.highlight(code, { language }).value;
+                },
+                langPrefix: 'hljs language-'
+            });
+
+            let rawMarkdown = "";
+            let isEditMode = false;
+
+            window.toggleEdit = function() {
+                isEditMode = !isEditMode;
+                document.getElementById('content').style.display = isEditMode ? 'none' : 'block';
+                document.getElementById('editor-container').style.display = isEditMode ? 'block' : 'none';
+                document.getElementById('edit-btn').style.display = isEditMode ? 'none' : 'flex';
+                document.getElementById('editor-actions').style.display = isEditMode ? 'flex' : 'none';
+                
+                if (isEditMode) {
+                    document.getElementById('editor-box').value = rawMarkdown;
+                    document.getElementById('editor-box').focus();
+                }
+            };
+
+            window.saveContent = async function() {
+                const newContent = document.getElementById('editor-box').value;
+                const badge = document.getElementById('status-badge');
+                
+                badge.innerText = "Đang lưu tri thức... 💾";
+                badge.style.display = 'block';
+                badge.style.background = 'var(--primary-color)';
+
+                try {
+                    const response = await fetch('/save', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            file_path: filePath,
+                            content: newContent
+                        })
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        rawMarkdown = newContent;
+                        const cleanMarkdown = rawMarkdown.replace(/^---[\s\S]*?---/, '');
+                        document.getElementById('content').innerHTML = marked.parse(cleanMarkdown);
+                        document.querySelectorAll('pre code').forEach((block) => hljs.highlightElement(block));
+                        
+                        badge.innerText = "Đã lưu thành công! ✅";
+                        badge.style.background = '#50C878';
+                        
+                        setTimeout(() => {
+                            badge.style.display = 'none';
+                            toggleEdit();
+                        }, 1500);
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (err) {
+                    badge.innerText = "Lỗi khi lưu: " + err.message + " ❌";
+                    badge.style.background = '#ff6b6b';
+                    setTimeout(() => badge.style.display = 'none', 3000);
+                }
+            };
+
+            // Keyboard shortcut Ctrl+S or Cmd+S
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    if (isEditMode) {
+                        e.preventDefault();
+                        saveContent();
+                    }
+                }
+            });
+
+            fetch(filePath)
+                .then(response => {
+                    if (!response.ok) throw new Error('Không thể tải file: ' + response.statusText);
+                    return response.text();
+                })
+                .then(text => {
+                    rawMarkdown = text;
+                    // Remove frontmatter if present for display
+                    const cleanMarkdown = text.replace(/^---[\s\S]*?---/, '');
+                    document.getElementById('content').innerHTML = marked.parse(cleanMarkdown);
+                    // Trigger highlighting for all code blocks
+                    document.querySelectorAll('pre code').forEach((block) => {
+                        hljs.highlightElement(block);
+                    });
+                    
+                    // Update page title based on content if possible
+                    const h1 = document.querySelector('h1');
+                    if (h1) document.title = h1.innerText + " | Digital Brain";
+                })
+                .catch(err => {
+                    document.getElementById('content').innerHTML = `<div class="error-msg">Lỗi: ${err.message}</div>`;
+                });
+        });
+    </script>
+</body>
+</html>

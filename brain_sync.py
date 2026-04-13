@@ -1,12 +1,10 @@
 import os
 import re
 import json
-from datetime import datetime
 
-# Paths (Use relative paths for open-source template)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-WIKI_DIR = os.path.join(BASE_DIR, "wiki")
-STATS_JS = os.path.join(BASE_DIR, "stats.js")
+# Paths
+WIKI_DIR = "/Users/viethahong/Documents/digital-brain/wiki"
+STATS_JS = "/Users/viethahong/Documents/digital-brain/stats.js"
 
 def get_frontmatter(content):
     match = re.search(r'^---\s+(.*?)\s+---', content, re.DOTALL | re.MULTILINE)
@@ -24,6 +22,7 @@ def sync():
         "principles": {"1_Biet": 0, "2_Hieu": 0, "3_Hanh": 0, "4_Thong": 0, "5_Tue": 0, "files": []},
         "philosophies": {"1_Biet": 0, "2_Hieu": 0, "3_Hanh": 0, "4_Thong": 0, "5_Tue": 0, "files": []},
         "relationships": {"1_Biet": 0, "2_Quen": 0, "3_Than": 0, "4_Thuong": 0, "5_Yeu": 0, "files": []},
+        "incubator": {"1_Biet": 0, "2_Hieu": 0, "3_Hanh": 0, "4_Thong": 0, "5_Tue": 0, "files": []},
         "total_files": 0,
         "last_sync": "",
         "graph": {"nodes": [], "links": []}
@@ -33,7 +32,8 @@ def sync():
         "01_knowledge": "knowledge",
         "02_principles": "principles",
         "03_philosophies": "philosophies",
-        "04_relationships": "relationships"
+        "04_relationships": "relationships",
+        "05_incubator": "incubator"
     }
 
     title_to_id = {}
@@ -49,8 +49,7 @@ def sync():
                 if file.endswith(".md") and not file.startswith("template"):
                     stats["total_files"] += 1
                     file_path = os.path.join(root, file)
-                    # rel_path for the web UI to link to files
-                    rel_path = os.path.relpath(file_path, BASE_DIR)
+                    rel_path = os.path.relpath(file_path, os.path.dirname(WIKI_DIR))
                     
                     with open(file_path, 'r', encoding='utf-8') as f:
                         content = f.read()
@@ -78,6 +77,7 @@ def sync():
                             "path": rel_path
                         })
                         title_to_id[title.lower()] = node_id
+                        # Also map filename without ext as potential link target
                         title_to_id[file.replace(".md", "").lower()] = node_id
 
     # Second pass: Collect links
@@ -107,6 +107,7 @@ def sync():
                                     "target": title_to_id[target]
                                 })
 
+    from datetime import datetime
     stats["last_sync"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # Output to stats.js

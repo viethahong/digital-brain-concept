@@ -1,44 +1,50 @@
-# Digital Brain Concept
+# 🧠 DIGITAL BRAIN — Emerald Edition
 
-This is a template for a "Second Brain" system built with HTML, CSS, JavaScript, and Python. It's designed to help you manage your knowledge, principles, philosophies, and relationships through a structured wiki and an interactive dashboard.
+Hệ thống ghi chép và tự động tổ chức tri thức cá nhân theo kiến trúc **LLM-Wiki** của Andrej Karpathy, được tùy chỉnh sâu sắc cho tư duy **5 Trụ cột cốt lõi**.
 
-## Features
+---
 
-- **Knowledge Graph**: Visualize the connections between your notes.
-- **Progress Tracking**: Monitor your mastery levels (Biet, Hieu, Hanh, Thong, Tue) across different categories.
-- **Brain Room**: An interactive command center that identifies gaps in your knowledge and provides prompts for growth.
-- **Markdown-based**: Your notes are stored as simple `.md` files, ensuring they stay yours forever.
+## 🏛️ 5 TRỤ CỘT (PILLARS)
 
-## Getting Started
+### 📊 TRI THỨC SỐNG (KNOWLEDGE)
+- **Cấu trúc:** `#level/1_biet` (Biết), `#level/2_hieu` (Hiểu), `#level/3_hanh` (Hành), `#level/4_thong` (Thông), `#level/5_tue` (Tuệ).
+- AI sẽ liên tục hỏi bạn về quá trình thực hành để nâng cấp tri thức.
 
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/your-username/digital-brain-concept.git
-    cd digital-brain-concept
-    ```
+### ⚖️ NGUYÊN TẮC SỐNG (PRINCIPLES)
+- Ranh giới Đúng/Sai (Đạo đức, Pháp luật, Quan điểm cá nhân).
 
-2.  **Add your notes**: Place your `.md` files in the corresponding folders within the `wiki/` directory. Use the following frontmatter at the top of each file:
-    ```markdown
-    ---
-    title: Your Topic Name
-    level: 1_Biet
-    ---
-    ```
-    Available levels: `1_Biet`, `2_Hieu`, `3_Hanh`, `4_Thong`, `5_Tue`. (For relationships: `1_Biet`, `2_Quen`, `3_Than`, `4_Thuong`, `5_Yeu`).
+### 🧘 TRIẾT LÝ SỐNG (PHILOSOPHIES)
+- Hệ thống Niềm tin, không có Đúng/Sai.
 
-3.  **Sync your brain**: Run the Python script to update the dashboard data:
-    ```bash
-    python3 brain_sync.py
-    python3 brain_analyzer.py
-    ```
+### 🤝 MỐI QUAN HỆ (RELATIONSHIPS)
+- Cấu trúc: **5W1H** (Who, What, Where, When, Why, How).
+- Cấp độ: `Biết` -> `Quen` -> `Thương` -> `Yêu`.
 
-4.  **Open the dashboard**: Simply open `index.html` in your web browser.
+### 🧪 DỮ LIỆU THÔ (RAW DATA)
+- Nơi thả các ý tưởng, transcript, bài báo chưa phân loại.
 
-## Customization
+---
 
-- Modify `index.css` to change the look and feel.
-- Update `prompts.html` to add your own exploration questions.
+## ⚙️ CƠ CHẾ "HỎI NGƯỢC" (ASKING BACK)
 
-## License
+Bộ não số này **không chỉ là nơi bạn nạp dữ liệu**. Khi bạn nạp một thông tin mới:
+1. AI sẽ đọc và phân loại vào 1 trong 5 trụ cột.
+2. AI sẽ chủ động **đặt câu hỏi gợi mở** (từ 1-2 câu) để khai thác sâu hơn.
+3. Nếu là Mối quan hệ, AI sẽ hỏi về **Câu chuyện**. Nếu là Tri thức, AI sẽ hỏi về **Hành động**.
 
-This project is open-source. Feel free to use and modify it for your own personal growth.
+### Cách kích hoạt:
+- **Chủ động:** "Hãy dùng bộ khung 5W1H để phỏng vấn tôi về dự án này."
+- **Tự động:** Chỉ cần kể một mẩu chuyện, AI sẽ tự chọn câu hỏi phù hợp nhất từ [Exploration Framework](/wiki/templates/exploration-framework.md) để hỏi lại bạn.
+
+---
+
+## 🚀 CÁCH SỬ DỤNG
+
+1. **Giao diện Dashboard:** Mở file `index.html` bằng trình duyệt để xem tình trạng bộ não và các "Magic Chips" gợi ý.
+2. **Nạp tri thức:** "Hãy ingest file [tên file] trong raw" hoặc "Hãy lắng nghe tâm sự của tôi và hỏi ngược lại để xây dựng wiki".
+3. **Tra cứu:** "Dùng 5 trụ cột để tư vấn cho tôi về vấn đề [vấn đề cụ thể]".
+4. **Bảo trì:** "Hãy lint hệ thống, tìm các trang đang bị 'quên' (trọng số thấp) và nhắc lại cho tôi".
+
+---
+
+*Hệ điều hành được cấu hình trong `CLAUDE.md`. Chúc bạn xây dựng được một bộ não số vĩ đại.*

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Chat | Digital Brain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <style>
+    <style>
+        .chat-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            /* Container height and flex handled in index.css */
+        }
+        
+        .chat-history {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+
+        .msg-user {
+            background: rgba(80, 200, 120, 0.15);
+            border: 1px solid var(--primary-color);
+            color: var(--text-main);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-ai {
+            background: rgba(128, 128, 128, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+            margin-left: 1rem;
+            margin-bottom: 1rem;
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+    </style>
+</head>
+<body>
+    <div class="background-glow"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">Digital Brain</a>
+            <div class="nav-links">
+                <a href="index.html">Dashboard</a>
+                <a href="brain_room.html">Brain Room</a>
+                <a href="wiki_hub.html">Wiki Hub</a>
+                <a href="graph.html">Knowledge Graph</a>
+                <a href="learn.html">Learn</a>
+                <a href="chat.html" class="active">Chat</a>
+                <button id="theme-toggle" class="theme-toggle" title="Chuyển chế độ Sáng/Tối">☀️</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="header-left">
+                    <div>
+                        <h2 style="margin: 0; color: var(--primary-color); font-family: 'Outfit';">Neural Link</h2>
+                        <p style="margin: 0; font-size: 0.8rem; color: var(--text-secondary);">Trò chuyện với chính kho tri thức của bạn (RAG)</p>
+                    </div>
+                    <button onclick="clearChatHistory()" class="btn-clear">Dọn dẹp</button>
+                </div>
+                <div class="header-right">
+                    <select id="provider" class="model-select" onchange="updateModelDefault()">
+                        <option value="fpt">FPT Cloud AI</option>
+                        <option value="gemini">Google Gemini</option>
+                    </select>
+                    <select id="model-name" class="model-select">
+                        <!-- Options populated by JS -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="chat-history" id="chat-history">
+                <div class="message msg-ai">
+                    Xin chào! Tôi là Digital Brain của bạn. Tôi đã tải toàn bộ các file tri thức, nguyên tắc và ghi chú của bạn vào bộ não. Bạn muốn hỏi điều gì hôm nay?
+                </div>
+            </div>
+            
+            <div class="typing-indicator" id="typing">AI đang lục tìm trí nhớ... 🧠</div>
+
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" class="chat-input" placeholder="Hỏi gì đó về nguyên tắc ranh giới, hay cách làm grand slam offer..." onkeypress="handleEnter(event)">
+                <button id="btn-send" class="btn-send" onclick="sendMessage()">GỬI LỆNH</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-container">
+            <a href="index.html" class="mobile-nav-item"><span>🏠</span>Dashboard</a>
+            <a href="brain_room.html" class="mobile-nav-item"><span>🛠️</span>Room</a>
+            <a href="wiki_hub.html" class="mobile-nav-item"><span>📚</span>Wiki</a>
+            <a href="chat.html" class="mobile-nav-item active"><span>💬</span>Chat</a>
+            <a href="learn.html" class="mobile-nav-item"><span>🎓</span>Learn</a>
+        </div>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="theme.js"></script>
+    <script>
+        let messages = [];
+
+        const modelOptions = {
+            gemini: [
+                { value: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite' },
+                { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+                { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' }
+            ],
+            fpt: [
+                { value: 'Llama-3.3-70B-Instruct', label: 'Llama 3.3 70B Instruct' },
+                { value: 'DeepSeek-V3.2-Speciale', label: 'DeepSeek V3.2 Speciale' },
+                { value: 'Qwen3-32B', label: 'Qwen 3 32B' },
+                { value: 'gemma-3-27b-it', label: 'Gemma 3 27B IT' },
+                { value: 'SaoLa 3.1-medium', label: 'SaoLa 3.1 Medium' },
+                { value: 'SaoLa-Llama3.1-planner', label: 'SaoLa Llama 3.1 Planner' },
+                { value: 'SaoLa3.1-medium', label: 'SaoLa 3.1 Medium (v2)' },
+                { value: 'Qwen3-VL-8B-Instruct', label: 'Qwen 3 VL 8B' },
+                { value: 'gemma-4-31B-it', label: 'Gemma 4 31B IT' },
+                { value: 'gemma-4-26B-A4B-it', label: 'Gemma 4 26B A4B' }
+            ]
+        };
+
+        function saveChatHistory() {
+            localStorage.setItem('brain_chat_history', JSON.stringify(messages));
+        }
+
+        function loadChatHistory() {
+            const history = localStorage.getItem('brain_chat_history');
+            if (history) {
+                messages = JSON.parse(history);
+                messages.forEach(msg => {
+                    appendMessage(msg.role === 'user' ? 'user' : 'ai', msg.content, false);
+                });
+            }
+        }
+
+        function clearChatHistory() {
+            if (confirm('Bạn có chắc muốn xóa toàn bộ lịch sử trò chuyện này?')) {
+                localStorage.removeItem('brain_chat_history');
+                messages = [];
+                const historyEl = document.getElementById('chat-history');
+                historyEl.innerHTML = `<div class="message msg-ai">Xin chào! Tôi đã làm sạch trí nhớ. Bạn muốn bắt đầu lại từ đâu?</div>`;
+            }
+        }
+
+        function updateModelDefault() {
+            const provider = document.getElementById('provider').value;
+            const modelSelect = document.getElementById('model-name');
+            
+            modelSelect.innerHTML = '';
+            
+            const options = modelOptions[provider] || [];
+            options.forEach(opt => {
+                const el = document.createElement('option');
+                el.value = opt.value;
+                el.innerText = opt.label;
+                modelSelect.appendChild(el);
+            });
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const provider = document.getElementById('provider').value;
+            const model = document.getElementById('model-name').value;
+
+            appendMessage('user', text);
+            messages.push({"role": "user", "content": text});
+            saveChatHistory();
+            
+            input.value = '';
+            
+            const btn = document.getElementById('btn-send');
+            const typing = document.getElementById('typing');
+            btn.disabled = true;
+            typing.style.display = 'block';
+            
+            scrollToBottom();
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        provider: provider,
+                        model: model,
+                        messages: messages
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    appendMessage('ai', result.message);
+                    messages.push({"role": "assistant", "content": result.message});
+                    saveChatHistory();
+                } else {
+                    appendMessage('ai', `❌ Lỗi: ${result.message}`);
+                }
+            } catch (err) {
+                appendMessage('ai', `❌ Lỗi kết nối: ${err.message}. Đảm bảo \`python3 brain_server.py\` đang chạy.`);
+            } finally {
+                btn.disabled = false;
+                typing.style.display = 'none';
+                scrollToBottom();
+            }
+        }
+
+        function appendMessage(role, text, shouldScroll = true) {
+            const history = document.getElementById('chat-history');
+            const div = document.createElement('div');
+            div.className = `message msg-${role}`;
+            
+            if (role === 'ai') {
+                div.innerHTML = marked.parse(text); 
+            } else {
+                div.innerText = text;
+            }
+            
+            history.appendChild(div);
+            if (shouldScroll) scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const history = document.getElementById('chat-history');
+            history.scrollTop = history.scrollHeight;
+        }
+
+        // Initialize
+        updateModelDefault();
+        loadChatHistory();
+
+        // Global interceptor for .md links to use viewer.html
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
+            if (link && link.href && link.href.endsWith('.md')) {
+                e.preventDefault();
+                // Extract relative path from href
+                const url = new URL(link.href);
+                const relPath = url.pathname.startsWith('/') ? url.pathname.substring(1) : url.pathname;
+                window.open('viewer.html?file=' + encodeURIComponent(relPath), '_blank');
+            }
+        });
+    </script>
+</body>
+</html>
