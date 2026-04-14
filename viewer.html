@@ -286,6 +286,16 @@
             <div id="content" class="markdown-body">
                 <div class="loading">Đang tải tri thức... 🧠</div>
             </div>
+            
+            <!-- Backlinks Section -->
+            <div id="backlinks-container" style="margin-top: 4rem; border-top: 1px solid var(--border-color); padding-top: 2rem; display: none;">
+                <h3 style="color: var(--primary-color); font-size: 1.2rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>🔗</span> Liên kết ngược (Backlinks)
+                </h3>
+                <div id="backlinks-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
+                </div>
+            </div>
+
             <div id="editor-container" class="editor-container">
                 <textarea id="editor-box" class="editor-box" placeholder="Bắt đầu viết tri thức của bạn..."></textarea>
             </div>
@@ -294,6 +304,7 @@
         <div id="status-badge" class="status-badge">Đang lưu...</div>
     </main>
 
+    <script src="stats.js"></script>
     <script src="theme.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -317,9 +328,57 @@
             let rawMarkdown = "";
             let isEditMode = false;
 
+            // Load Backlinks
+            function loadBacklinks(currentPath) {
+                if (typeof BRAIN_STATS === 'undefined') return;
+                
+                // Find node by path
+                const node = BRAIN_STATS.graph.nodes.find(n => n.path === currentPath);
+                if (!node) return;
+                
+                const backlinks = BRAIN_STATS.backlinks[node.id];
+                if (backlinks && backlinks.length > 0) {
+                    const container = document.getElementById('backlinks-container');
+                    const list = document.getElementById('backlinks-list');
+                    container.style.display = 'block';
+                    
+                    list.innerHTML = backlinks.map(b => `
+                        <a href="viewer.html?file=${b.path}" class="backlink-card" style="
+                            padding: 1rem;
+                            background: rgba(255,255,255,0.03);
+                            border: 1px solid var(--border-color);
+                            border-radius: 12px;
+                            text-decoration: none;
+                            color: var(--text-main);
+                            transition: var(--transition);
+                            display: block;
+                        ">
+                            <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 0.2rem;">${b.title}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary); opacity: 0.7;">${b.path.split('/')[1] || 'Core'}</div>
+                        </a>
+                    `).join('');
+
+                    // Add hover effects via JS since it's injected
+                    const cards = list.querySelectorAll('.backlink-card');
+                    cards.forEach(card => {
+                        card.addEventListener('mouseenter', () => {
+                            card.style.borderColor = 'var(--primary-color)';
+                            card.style.transform = 'translateY(-2px)';
+                            card.style.background = 'rgba(80, 200, 120, 0.05)';
+                        });
+                        card.addEventListener('mouseleave', () => {
+                            card.style.borderColor = 'var(--border-color)';
+                            card.style.transform = 'translateY(0)';
+                            card.style.background = 'rgba(255,255,255,0.03)';
+                        });
+                    });
+                }
+            }
+
             window.toggleEdit = function() {
                 isEditMode = !isEditMode;
                 document.getElementById('content').style.display = isEditMode ? 'none' : 'block';
+                document.getElementById('backlinks-container').style.display = (isEditMode || !document.getElementById('backlinks-list').innerHTML) ? 'none' : 'block';
                 document.getElementById('editor-container').style.display = isEditMode ? 'block' : 'none';
                 document.getElementById('edit-btn').style.display = isEditMode ? 'none' : 'flex';
                 document.getElementById('editor-actions').style.display = isEditMode ? 'flex' : 'none';
@@ -400,6 +459,9 @@
                     // Update page title based on content if possible
                     const h1 = document.querySelector('h1');
                     if (h1) document.title = h1.innerText + " | Digital Brain";
+
+                    // Load Backlinks
+                    loadBacklinks(filePath);
                 })
                 .catch(err => {
                     document.getElementById('content').innerHTML = `<div class="error-msg">Lỗi: ${err.message}</div>`;

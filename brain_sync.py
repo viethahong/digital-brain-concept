@@ -80,7 +80,8 @@ def sync():
                         # Also map filename without ext as potential link target
                         title_to_id[file.replace(".md", "").lower()] = node_id
 
-    # Second pass: Collect links
+    # Second pass: Collect links and compute backlinks
+    backlinks = {} # target_id -> list of node info
     for folder_name, stat_key in folders.items():
         folder_path = os.path.join(WIKI_DIR, folder_name)
         if not os.path.exists(folder_path):
@@ -90,6 +91,7 @@ def sync():
             for file in files:
                 if file.endswith(".md") and not file.startswith("template"):
                     file_path = os.path.join(root, file)
+                    rel_path = os.path.relpath(file_path, os.path.dirname(WIKI_DIR))
                     with open(file_path, 'r', encoding='utf-8') as f:
                         content = f.read()
                         fm = get_frontmatter(content)
@@ -102,10 +104,25 @@ def sync():
                         for link in links:
                             target = link.strip().lower()
                             if target in title_to_id:
+                                target_id = title_to_id[target]
                                 stats["graph"]["links"].append({
                                     "source": source_id,
-                                    "target": title_to_id[target]
+                                    "target": target_id
                                 })
+                                
+                                # Add to backlinks
+                                if target_id not in backlinks:
+                                    backlinks[target_id] = []
+                                
+                                # Avoid duplicate entries from same source to same target
+                                if not any(b["id"] == source_id for b in backlinks[target_id]):
+                                    backlinks[target_id].append({
+                                        "id": source_id,
+                                        "title": source_title,
+                                        "path": rel_path
+                                    })
+    
+    stats["backlinks"] = backlinks
 
     from datetime import datetime
     stats["last_sync"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
